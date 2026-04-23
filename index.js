@@ -25,6 +25,16 @@ function onCheckboxChange(event) {
     console.log(`[${extensionName}] Setting 'enabled' saved:`, value);
 }
 
+function onButtonClick() {
+    const isEnabled = extension_settings[extensionName].enabled;
+    // Dùng thư viện toastr có sẵn của ST để hiển thị thông báo
+    toastr.info(
+        `HUD Simu is ${isEnabled ? "enabled" : "disabled"}`,
+        "HUD Simu"
+    );
+    console.log(`[${extensionName}] Button clicked`);
+}
+
 // Khởi tạo Extension
 jQuery(async () => {
     console.log(`[${extensionName}] Loading...`);
@@ -38,6 +48,9 @@ jQuery(async () => {
        
         // NEW: Bind checkbox event
         $("#hud_simu_enabled_checkbox").on("input", onCheckboxChange);
+       
+        // NEW: Bind button event
+        $("#hud_simu_test_button").on("click", onButtonClick);
        
         // NEW: Load saved settings
         loadSettings();
