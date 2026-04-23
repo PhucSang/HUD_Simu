@@ -2,7 +2,7 @@
 import { extension_settings } from "../../../extensions.js";
 
 // Tên này PHẢI khớp chính xác với tên thư mục chứa tiện ích của bạn
-const extensionName = "hud-simu"; 
+const extensionName = "HUD_Simu"; 
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 
 // Khởi tạo Extension
