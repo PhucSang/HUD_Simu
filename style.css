@@ -92,3 +92,17 @@
     margin-top: 0;
     color: #00aaff;
 }
+
+/* ----- ASSIST OPTIONS ----- */
+.hud-assist-option {
+    cursor: pointer;
+    color: #00aaff;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+.hud-assist-option:hover {
+    background: rgba(0, 170, 255, 0.2);
+    color: #fff;
+}

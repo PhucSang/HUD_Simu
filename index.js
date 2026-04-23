@@ -82,7 +82,7 @@ function updateHudUI(data) {
     if (data.assist && Array.isArray(data.assist)) {
         $("#hud-assist-list").empty();
         data.assist.forEach(a => {
-            $("#hud-assist-list").append(`<li>${a}</li>`);
+            $("#hud-assist-list").append(`<li class="hud-assist-option">${a}</li>`);
         });
     }
 }
@@ -248,6 +248,17 @@ jQuery(async () => {
 
         // Đóng menu khi bấm nút X
         $("#hud-simu-close-btn").on("click", function() {
+            $("#hud-simu-overlay").fadeOut(200);
+        });
+
+        // NEW: Xử lý khi click vào tùy chọn Assist
+        $("body").on("click", ".hud-assist-option", function() {
+            const optionText = $(this).text();
+            // 1. Điền text vào khung chat của SillyTavern và kích hoạt event input
+            $("#send_textarea").val(optionText).trigger("input");
+            // 2. Bấm nút Gửi
+            $("#send_but").click();
+            // 3. Đóng Menu HUD lại
             $("#hud-simu-overlay").fadeOut(200);
         });
 
