@@ -1,0 +1,52 @@
+.hud-simu-overlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    z-index: 9999;
+    background: rgba(20, 20, 25, 0.95);
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #ddd;
+    font-family: sans-serif;
+    font-size: 13px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    /* Xóa pointer-events: none để có thể bấm được vào tab */
+}
+.hud-simu-tabs {
+    display: flex;
+    border-bottom: 1px solid #555;
+    background: rgba(10, 10, 10, 0.9);
+    border-radius: 8px 8px 0 0;
+}
+.hud-simu-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #888;
+    padding: 8px 2px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+.hud-simu-tab-btn.active {
+    color: #fff;
+    border-bottom: 2px solid #00aaff;
+}
+.hud-simu-tab-pane {
+    display: none;
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+.hud-simu-tab-pane.active {
+    display: block;
+}
+.hud-simu-tab-pane ul, .hud-simu-tab-pane ol {
+    padding-left: 20px;
+}
+.hud-simu-tab-pane h4 {
+    margin-top: 0;
+    color: #00aaff;
+}

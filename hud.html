@@ -1,0 +1,50 @@
+<div id="hud-simu-overlay" class="hud-simu-overlay" style="display: none;">
+    <!-- Thanh Navigation Tabs -->
+    <div class="hud-simu-tabs">
+        <button class="hud-simu-tab-btn active" data-tab="tab-context">Context</button>
+        <button class="hud-simu-tab-btn" data-tab="tab-stats">Stats</button>
+        <button class="hud-simu-tab-btn" data-tab="tab-inventory">Inventory</button>
+        <button class="hud-simu-tab-btn" data-tab="tab-goals">Goals</button>
+        <button class="hud-simu-tab-btn" data-tab="tab-assist">Assist</button>
+    </div>
+    
+    <!-- Nội dung các Tabs -->
+    <div class="hud-simu-content">
+        <div id="tab-context" class="hud-simu-tab-pane active">
+            <h4>[CONTEXT & ENVIRONMENT]</h4>
+            <ul>
+                <li><b>Time:</b> [HH:MM AM/PM] | <b>Date:</b> [Weekday], [DD/MM/YYYY]</li>
+                <li><b>Location:</b> [Current specific room or area]</li>
+                <li><b>Brief:</b> [1-2 sentences summarizing the current situation, tension, and atmosphere]</li>
+            </ul>
+        </div>
+        <div id="tab-stats" class="hud-simu-tab-pane">
+            <h4>[BASIC STATS & CONDITION]</h4>
+            <ul>
+                <li><b>Energy:</b> [Current]/[Max] | <b>Nourishment:</b> [X]% | <b>Hydration:</b> [X]% | <b>Hygiene:</b> [X]%</li>
+                <li><b>Status:</b> [Healthy, Exhausted, Aroused, Injured left arm, Slightly Drunk, etc.]</li>
+            </ul>
+        </div>
+        <div id="tab-inventory" class="hud-simu-tab-pane">
+            <h4>[INVENTORY & SURROUNDINGS]</h4>
+            <ul>
+                <li><b>Money:</b> [Amount] [Currency]</li>
+                <li><b>Carrying:</b> [Key items you are holding]</li>
+                <li><b>Nearby:</b> [Notable interactive items]</li>
+            </ul>
+        </div>
+        <div id="tab-goals" class="hud-simu-tab-pane">
+            <h4>[ACTIVE GOALS]</h4>
+            <ul>
+                <li><b>[Goal 1 Name]:</b> [Short description] ([Countdown])</li>
+            </ul>
+        </div>
+        <div id="tab-assist" class="hud-simu-tab-pane">
+            <h4>[SYSTEM ASSIST]</h4>
+            <ol>
+                <li>[Action/Dialogue option 1]</li>
+                <li>[Action/Dialogue option 2]</li>
+            </ol>
+        </div>
+    </div>
+</div>
