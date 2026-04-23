@@ -7,5 +7,6 @@
   "css": "style.css",
   "author": "PhucSang",
   "version": "1.0.0",
-  "homePage": "https://github.com/PhucSang/HUD_Simu"
+  "homePage": "https://github.com/PhucSang/HUD_Simu",
+  "generate_interceptor": "hudSimuPromptInterceptor"
 }

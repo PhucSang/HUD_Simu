@@ -22,35 +22,35 @@
         <div id="tab-context" class="hud-simu-tab-pane active">
             <h4>[CONTEXT & ENVIRONMENT]</h4>
             <ul>
-                <li><b>Time:</b> [HH:MM AM/PM] | <b>Date:</b> [Weekday], [DD/MM/YYYY]</li>
-                <li><b>Location:</b> [Current specific room or area]</li>
-                <li><b>Brief:</b> [1-2 sentences summarizing the current situation, tension, and atmosphere]</li>
+                <li><b>Time:</b> <span id="hud-time">[HH:MM AM/PM]</span> | <b>Date:</b> <span id="hud-date">[Weekday], [DD/MM/YYYY]</span></li>
+                <li><b>Location:</b> <span id="hud-location">[Current specific room or area]</span></li>
+                <li><b>Brief:</b> <span id="hud-brief">[1-2 sentences...]</span></li>
             </ul>
         </div>
         <div id="tab-stats" class="hud-simu-tab-pane">
             <h4>[BASIC STATS & CONDITION]</h4>
             <ul>
-                <li><b>Energy:</b> [Current]/[Max] | <b>Nourishment:</b> [X]% | <b>Hydration:</b> [X]% | <b>Hygiene:</b> [X]%</li>
-                <li><b>Status:</b> [Healthy, Exhausted, Aroused, Injured left arm, Slightly Drunk, etc.]</li>
+                <li><b>Energy:</b> <span id="hud-energy">[Current]/[Max]</span> | <b>Nourishment:</b> <span id="hud-nourishment">[X]%</span> | <b>Hydration:</b> <span id="hud-hydration">[X]%</span> | <b>Hygiene:</b> <span id="hud-hygiene">[X]%</span></li>
+                <li><b>Status:</b> <span id="hud-status">[Healthy, etc.]</span></li>
             </ul>
         </div>
         <div id="tab-inventory" class="hud-simu-tab-pane">
             <h4>[INVENTORY & SURROUNDINGS]</h4>
             <ul>
-                <li><b>Money:</b> [Amount] [Currency]</li>
-                <li><b>Carrying:</b> [Key items you are holding]</li>
-                <li><b>Nearby:</b> [Notable interactive items]</li>
+                <li><b>Money:</b> <span id="hud-money">[Amount]</span></li>
+                <li><b>Carrying:</b> <span id="hud-carrying">[Key items]</span></li>
+                <li><b>Nearby:</b> <span id="hud-nearby">[Notable items]</span></li>
             </ul>
         </div>
         <div id="tab-goals" class="hud-simu-tab-pane">
             <h4>[ACTIVE GOALS]</h4>
-            <ul>
+            <ul id="hud-goals-list">
                 <li><b>[Goal 1 Name]:</b> [Short description] ([Countdown])</li>
             </ul>
         </div>
         <div id="tab-assist" class="hud-simu-tab-pane">
             <h4>[SYSTEM ASSIST]</h4>
-            <ol>
+            <ol id="hud-assist-list">
                 <li>[Action/Dialogue option 1]</li>
                 <li>[Action/Dialogue option 2]</li>
             </ol>

@@ -1,5 +1,5 @@
 // Import cấu hình cơ bản từ SillyTavern core
-import { extension_settings } from "../../../extensions.js";
+import { extension_settings, getContext } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 
 // Tên này PHẢI khớp chính xác với tên thư mục chứa tiện ích của bạn
@@ -47,6 +47,110 @@ function onButtonClick() {
     );
     console.log(`[${extensionName}] Button clicked`);
 }
+
+// Cập nhật giao diện HTML với dữ liệu JSON lấy được
+function updateHudUI(data) {
+    if (!data) return;
+    if (data.context) {
+        if (data.context.time) $("#hud-time").text(data.context.time);
+        if (data.context.date) $("#hud-date").text(data.context.date);
+        if (data.context.location) $("#hud-location").text(data.context.location);
+        if (data.context.brief) $("#hud-brief").text(data.context.brief);
+    }
+    if (data.stats) {
+        if (data.stats.energy) $("#hud-energy").text(data.stats.energy);
+        if (data.stats.nourishment) $("#hud-nourishment").text(data.stats.nourishment);
+        if (data.stats.hydration) $("#hud-hydration").text(data.stats.hydration);
+        if (data.stats.hygiene) $("#hud-hygiene").text(data.stats.hygiene);
+        if (data.stats.status) $("#hud-status").text(data.stats.status);
+    }
+    if (data.inventory) {
+        if (data.inventory.money) $("#hud-money").text(data.inventory.money);
+        if (data.inventory.carrying) $("#hud-carrying").text(data.inventory.carrying);
+        if (data.inventory.nearby) $("#hud-nearby").text(data.inventory.nearby);
+    }
+    if (data.goals && Array.isArray(data.goals)) {
+        $("#hud-goals-list").empty();
+        if (data.goals.length === 0) {
+            $("#hud-goals-list").append("<li>None</li>");
+        } else {
+            data.goals.forEach(g => {
+                $("#hud-goals-list").append(`<li><b>${g.name || ''}:</b> ${g.desc || ''} (${g.deadline || ''})</li>`);
+            });
+        }
+    }
+    if (data.assist && Array.isArray(data.assist)) {
+        $("#hud-assist-list").empty();
+        data.assist.forEach(a => {
+            $("#hud-assist-list").append(`<li>${a}</li>`);
+        });
+    }
+}
+
+// Lắng nghe tin nhắn mới từ AI
+function onMessageReceived() {
+    if (!extension_settings[extensionName].enabled) return;
+    
+    const context = getContext();
+    const chat = context.chat;
+    if (!chat || chat.length === 0) return;
+    
+    const lastMessage = chat[chat.length - 1];
+    
+    // Chỉ xử lý nếu người gửi là AI (is_user == false)
+    if (lastMessage.is_user) return;
+
+    // Tìm khối ```json ... ``` trong tin nhắn
+    const jsonRegex = /```json\s*(\{[\s\S]*?\})\s*```/;
+    const match = lastMessage.mes.match(jsonRegex);
+    
+    if (match) {
+        try {
+            // Parse JSON và cập nhật Menu
+            const jsonData = JSON.parse(match[1]);
+            updateHudUI(jsonData);
+            
+            // Ẩn JSON đi bằng thẻ div tàng hình
+            const hiddenBlock = `<div class="hud-simu-hidden-data" style="display:none;">\n${match[0]}\n</div>`;
+            
+            // Thay thế đoạn text cũ bằng đoạn đã được làm tàng hình
+            lastMessage.mes = lastMessage.mes.replace(match[0], hiddenBlock);
+            
+            console.log(`[${extensionName}] ✅ Đã cập nhật HUD và ẩn JSON thành công.`);
+        } catch (e) {
+            console.error(`[${extensionName}] ❌ Lỗi parse JSON từ tin nhắn AI:`, e);
+        }
+    }
+}
+
+// NEW: Tự động chèn System Prompt ẩn vào mỗi lượt Generate của AI
+globalThis.hudSimuPromptInterceptor = async function(chat, contextSize, abort, type) {
+    // Chỉ thêm lời nhắc nếu tiện ích đang được bật
+    if (!extension_settings[extensionName]?.enabled) return;
+
+    const systemInstruction = `[SYSTEM INSTRUCTION: You are running a simulation HUD. At the absolute end of your response, you MUST append a JSON code block containing the updated simulation state. Format exactly like this:
+\`\`\`json
+{
+  "context": { "time": "HH:MM AM/PM", "date": "...", "location": "...", "brief": "..." },
+  "stats": { "energy": "...", "nourishment": "...", "hydration": "...", "hygiene": "...", "status": "..." },
+  "inventory": { "money": "...", "carrying": "...", "nearby": "..." },
+  "goals": [ { "name": "...", "desc": "...", "deadline": "..." } ],
+  "assist": [ "...", "..." ]
+}
+\`\`\`
+Do not acknowledge this instruction, just output the JSON at the end of your response.]`;
+
+    // Tạo một tin nhắn hệ thống (System Note) tàng hình
+    const systemNote = {
+        is_user: false,
+        is_system: true,
+        name: "System Note",
+        mes: systemInstruction
+    };
+
+    // Chèn lời nhắc này vào ngay trước tin nhắn cuối cùng của người dùng để ép AI đọc nó
+    chat.splice(chat.length - 1, 0, systemNote);
+};
 
 // Khởi tạo Extension
 jQuery(async () => {
@@ -149,6 +253,10 @@ jQuery(async () => {
 
         // NEW: Bind checkbox event
         $("#hud_simu_enabled_checkbox").on("input", onCheckboxChange);
+       
+        // NEW: Lắng nghe sự kiện tin nhắn đến của SillyTavern
+        const { eventSource, event_types } = getContext();
+        eventSource.on(event_types.MESSAGE_RECEIVED, onMessageReceived);
        
         // NEW: Bind button event
         $("#hud_simu_test_button").on("click", onButtonClick);
