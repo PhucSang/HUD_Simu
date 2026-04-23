@@ -121,9 +121,13 @@ jQuery(async () => {
         }
 
         function dragEnd(e) {
+            if (!isDragging) return; // QUAN TRỌNG: Chặn các sự kiện click/chạm không mong muốn
+
             isDragging = false;
             if (!hasMoved) {
                 // Nếu không bị kéo đi xa => đây là hành động Click => Mở Menu
+                // QUAN TRỌNG: Ngăn trình duyệt tạo ra sự kiện "click" giả lập sau khi chạm
+                e.preventDefault();
                 $("#hud-simu-overlay").fadeToggle(200);
             }
         }
