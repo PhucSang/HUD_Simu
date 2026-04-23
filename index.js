@@ -22,8 +22,10 @@ async function loadSettings() {
 
 function updateHudVisibility() {
     if (extension_settings[extensionName].enabled) {
-        $("#hud-simu-overlay").show();
+        $("#hud-simu-bubble").show();
+        $("#hud-simu-overlay").hide(); // Ẩn menu cho đến khi bấm vào bubble
     } else {
+        $("#hud-simu-bubble").hide();
         $("#hud-simu-overlay").hide();
     }
 }
@@ -71,6 +73,76 @@ jQuery(async () => {
             $("#" + $(this).attr("data-tab")).addClass("active");
         });
        
+        // NEW: Khởi tạo Logic Kéo Thả (Drag) và Click cho Bubble
+        const bubble = document.getElementById("hud-simu-bubble");
+        let isDragging = false;
+        let hasMoved = false;
+        let startX, startY, initialX, initialY;
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+            const rect = bubble.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            isDragging = true;
+            hasMoved = false;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            let currentX, currentY;
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            
+            // Nếu kéo một khoảng nhỏ thì mới tính là kéo (tránh click nhầm)
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                hasMoved = true;
+            }
+            if (hasMoved) {
+                if (e.cancelable) e.preventDefault(); // Tránh cuộn trang
+                bubble.style.left = (initialX + dx) + "px";
+                bubble.style.top = (initialY + dy) + "px";
+                bubble.style.right = "auto"; // Xóa thuộc tính right/bottom
+                bubble.style.bottom = "auto"; 
+            }
+        }
+
+        function dragEnd(e) {
+            isDragging = false;
+            if (!hasMoved) {
+                // Nếu không bị kéo đi xa => đây là hành động Click => Mở Menu
+                $("#hud-simu-overlay").fadeToggle(200);
+            }
+        }
+
+        // Đăng ký sự kiện Touch (cho Android)
+        bubble.addEventListener("touchstart", dragStart, { passive: false });
+        document.addEventListener("touchmove", drag, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+
+        // Đăng ký sự kiện Mouse (cho PC giả lập hoặc chuột)
+        bubble.addEventListener("mousedown", dragStart);
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("mouseup", dragEnd);
+
+        // Đóng menu khi bấm nút X
+        $("#hud-simu-close-btn").on("click", function() {
+            $("#hud-simu-overlay").fadeOut(200);
+        });
+
         // NEW: Bind checkbox event
         $("#hud_simu_enabled_checkbox").on("input", onCheckboxChange);
        
