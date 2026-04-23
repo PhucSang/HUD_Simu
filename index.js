@@ -88,7 +88,7 @@ function updateHudUI(data) {
 }
 
 // Lắng nghe tin nhắn mới từ AI
-function onMessageReceived() {
+async function onMessageReceived() {
     if (!extension_settings[extensionName].enabled) return;
     
     const context = getContext();
@@ -110,6 +110,12 @@ function onMessageReceived() {
             const jsonData = JSON.parse(match[1]);
             updateHudUI(jsonData);
             
+            // NEW: Lưu trạng thái vào chatMetadata của cuộc trò chuyện hiện tại để AI nhớ
+            context.chatMetadata['hud_simu_state'] = jsonData;
+            if (typeof context.saveMetadata === 'function') {
+                await context.saveMetadata();
+            }
+
             // Ẩn JSON đi bằng thẻ div tàng hình
             const hiddenBlock = `<div class="hud-simu-hidden-data" style="display:none;">\n${match[0]}\n</div>`;
             
@@ -123,12 +129,29 @@ function onMessageReceived() {
     }
 }
 
+// NEW: Cập nhật lại Menu khi người dùng đổi sang Chat khác hoặc tải lại trang
+function onChatChanged() {
+    if (!extension_settings[extensionName].enabled) return;
+    const context = getContext();
+    if (context.chatMetadata && context.chatMetadata['hud_simu_state']) {
+        updateHudUI(context.chatMetadata['hud_simu_state']);
+    }
+}
+
 // NEW: Tự động chèn System Prompt ẩn vào mỗi lượt Generate của AI
 globalThis.hudSimuPromptInterceptor = async function(chat, contextSize, abort, type) {
     // Chỉ thêm lời nhắc nếu tiện ích đang được bật
     if (!extension_settings[extensionName]?.enabled) return;
 
-    const systemInstruction = `[SYSTEM INSTRUCTION: You are running a simulation HUD. At the absolute end of your response, you MUST append a JSON code block containing the updated simulation state. Format exactly like this:
+    const context = getContext();
+    let currentStateText = "";
+    
+    // NEW: Đọc trạng thái hiện tại từ metadata và báo cho AI biết
+    if (context.chatMetadata && context.chatMetadata['hud_simu_state']) {
+        currentStateText = `\n\n[CURRENT STATE]:\n\`\`\`json\n${JSON.stringify(context.chatMetadata['hud_simu_state'], null, 2)}\n\`\`\`\n(Note: Use this current state as context for your generation. Update it logically based on new events).`;
+    }
+
+    const systemInstruction = `[SYSTEM INSTRUCTION: You are running a simulation HUD.${currentStateText}\n\nAt the absolute end of your response, you MUST append a JSON code block containing the updated simulation state. Format exactly like this:
 \`\`\`json
 {
   "context": { "time": "HH:MM AM/PM", "date": "...", "location": "...", "brief": "..." },
@@ -268,6 +291,7 @@ jQuery(async () => {
         // NEW: Lắng nghe sự kiện tin nhắn đến của SillyTavern
         const { eventSource, event_types } = getContext();
         eventSource.on(event_types.MESSAGE_RECEIVED, onMessageReceived);
+        eventSource.on(event_types.CHAT_CHANGED, onChatChanged);
        
         // NEW: Bind button event
         $("#hud_simu_test_button").on("click", onButtonClick);
@@ -275,6 +299,9 @@ jQuery(async () => {
         // NEW: Load saved settings
         loadSettings();
        
+        // NEW: Cập nhật giao diện lần đầu khi load trang
+        onChatChanged();
+
         console.log(`[${extensionName}] ✅ Loaded successfully`);
     } catch (error) {
         console.error(`[${extensionName}] ❌ Failed to load:`, error);
