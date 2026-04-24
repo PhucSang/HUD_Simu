@@ -10,6 +10,9 @@ const defaultSettings = {
     enabled: false
 };
 
+// Biến toàn cục để theo dõi các món đồ đã nhặt trước khi Accept
+let pickedUpItems = [];
+
 async function loadSettings() {
     extension_settings[extensionName] = extension_settings[extensionName] || {};
     if (Object.keys(extension_settings[extensionName]).length === 0) {
@@ -66,8 +69,28 @@ function updateHudUI(data) {
     }
     if (data.inventory) {
         if (data.inventory.money) $("#hud-money").text(data.inventory.money);
-        if (data.inventory.carrying) $("#hud-carrying").text(data.inventory.carrying);
-        if (data.inventory.nearby) $("#hud-nearby").text(data.inventory.nearby);
+        
+        // Xử lý cột Carrying (Bên trái)
+        $("#hud-carrying-list").empty();
+        let carrying = data.inventory.carrying;
+        if (typeof carrying === 'string') carrying = carrying.split(',').map(s => s.trim()).filter(s => s);
+        if (Array.isArray(carrying)) {
+            carrying.forEach(item => {
+                $("#hud-carrying-list").append(`<li>${item}</li>`);
+            });
+        }
+
+        // Xử lý cột Nearby (Bên phải)
+        $("#hud-nearby-list").empty();
+        let nearby = data.inventory.nearby;
+        if (typeof nearby === 'string') nearby = nearby.split(',').map(s => s.trim()).filter(s => s);
+        if (Array.isArray(nearby)) {
+            nearby.forEach(item => {
+                $("#hud-nearby-list").append(`<li><span>${item}</span> <button class="hud-add-item-btn" data-item="${item}">+</button></li>`);
+            });
+        }
+        // Reset danh sách tạm nhặt mỗi khi cập nhật dữ liệu mới từ AI
+        pickedUpItems = [];
     }
     if (data.goals && Array.isArray(data.goals)) {
         $("#hud-goals-list").empty();
@@ -156,7 +179,7 @@ globalThis.hudSimuPromptInterceptor = async function(chat, contextSize, abort, t
 {
   "context": { "time": "HH:MM AM/PM", "date": "...", "location": "...", "brief": "..." },
   "stats": { "energy": "...", "nourishment": "...", "hydration": "...", "hygiene": "...", "status": "..." },
-  "inventory": { "money": "...", "carrying": "...", "nearby": "..." },
+  "inventory": { "money": "...", "carrying": ["item1", "item2"], "nearby": ["item3", "item4"] },
   "goals": [ { "name": "...", "desc": "...", "deadline": "..." } ],
   "assist": [ "...", "..." ]
 }
@@ -283,6 +306,31 @@ jQuery(async () => {
             $("#send_but").click();
             // 3. Đóng Menu HUD lại
             $("#hud-simu-overlay").fadeOut(200);
+        });
+
+        // NEW: Lắng nghe khi bấm nút [+] ở ô Nearby
+        $("body").on("click", ".hud-add-item-btn", function() {
+            const itemName = $(this).attr("data-item");
+            pickedUpItems.push(itemName); // Lưu vào mảng tạm
+            // Bơm giao diện qua bên trái
+            $("#hud-carrying-list").append(`<li>${itemName}</li>`);
+            // Xóa khỏi bên phải
+            $(this).parent().remove();
+        });
+
+        // NEW: Lắng nghe khi bấm Accept Loot
+        $("body").on("click", "#hud-inventory-accept-btn", function() {
+            if (pickedUpItems.length === 0) return; // Chưa chọn gì thì không chạy
+
+            const pickupText = `pick up: [${pickedUpItems.join(", ")}] `;
+            const currentInput = $("#send_textarea").val();
+            
+            // Chèn text vào khung nhập liệu (nhưng KHÔNG tự gửi)
+            const newText = currentInput ? currentInput + " " + pickupText : pickupText;
+            $("#send_textarea").val(newText).trigger("input");
+            $("#send_textarea").focus();
+            
+            $("#hud-simu-overlay").fadeOut(200); // Đóng menu
         });
 
         // NEW: Bind checkbox event

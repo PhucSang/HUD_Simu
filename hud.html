@@ -36,11 +36,25 @@
         </div>
         <div id="tab-inventory" class="hud-simu-tab-pane">
             <h4>[INVENTORY & SURROUNDINGS]</h4>
-            <ul>
-                <li><b>Money:</b> <span id="hud-money">[Amount]</span></li>
-                <li><b>Carrying:</b> <span id="hud-carrying">[Key items]</span></li>
-                <li><b>Nearby:</b> <span id="hud-nearby">[Notable items]</span></li>
-            </ul>
+            <div class="hud-money-display" style="margin-bottom: 10px;"><b>Money:</b> <span id="hud-money">[Amount]</span></div>
+            <div class="hud-inventory-container">
+                <div class="hud-inventory-col hud-inventory-left">
+                    <h5>Carrying</h5>
+                    <ul id="hud-carrying-list" class="hud-item-list">
+                        <!-- Items đang có -->
+                    </ul>
+                </div>
+                <div class="hud-inventory-divider"></div>
+                <div class="hud-inventory-col hud-inventory-right">
+                    <h5>Nearby</h5>
+                    <ul id="hud-nearby-list" class="hud-item-list">
+                        <!-- Items có thể nhặt -->
+                    </ul>
+                </div>
+            </div>
+            <div class="hud-inventory-actions">
+                <button id="hud-inventory-accept-btn">Accept Loot</button>
+            </div>
         </div>
         <div id="tab-goals" class="hud-simu-tab-pane">
             <h4>[ACTIVE GOALS]</h4>
